@@ -4,6 +4,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Text;
 
 public class MessageReceiver : RabbitBase
@@ -12,12 +13,12 @@ public class MessageReceiver : RabbitBase
 
     public ConcurrentBag<RabbitMessage> Messages { get; } = new ConcurrentBag<RabbitMessage>();
 
-    public MessageReceiver(ConnectionFactory factory, ILogger log = null) : base(factory,log)
+    public MessageReceiver(IAsyncConnectionFactory factory, ILogger? log = null) : base(factory,log)
     {
        
     }
 
-    public MessageReceiver(string host, ILogger log = null) : base(host,log)
+    public MessageReceiver(string host, ILogger? log = null) : base(host,log)
     {
        
     }
@@ -56,6 +57,7 @@ public class MessageReceiver : RabbitBase
         var message = Encoding.UTF8.GetString(body);
         Messages.Add(new RabbitMessage() { Message = message });
         Logger.Info($"Received: {message}");
+       Debug.WriteLine(message);
     }
 
     public class RabbitMessage

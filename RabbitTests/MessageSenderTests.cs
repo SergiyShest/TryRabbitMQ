@@ -16,7 +16,7 @@ namespace Tests
 
         public RabbitTests()
         {
-            var factory = new ConnectionFactory() { HostName = "localhost" }; // Должно быть настроено или мокировано
+            var factory = new ConnectionFactory() { HostName = "localhost" }; 
             var logger = LogManager.GetCurrentClassLogger(); 
             sender = new MessageSender(factory, logger);
             receiver = new MessageReceiver(factory, logger);
@@ -25,29 +25,29 @@ namespace Tests
         [TestCase("testMessage")]
         public async Task SendMessageTest(string message)
         {
-            var prevMessCount = await getMessageCount();
-            await SendMessage(message);
+            var prevMessCount = await getMessageCount(QueueName);
+            await SendMessage(message, QueueName);
             await Task.Delay(1000); // Сократить задержку после улучшения механизма ожидания
-            var curMessCount = await getMessageCount();
+            var curMessCount = await getMessageCount(QueueName);
             Assert.That(prevMessCount + 1== curMessCount, $"Message count did not increase as expected. {prevMessCount + 1} == {curMessCount} ");
         }
 
-        private async Task SendMessage(string message)
+        private async Task SendMessage(string message,string queueName)
         {
-            await sender.SendMessageAsync(QueueName, message);
+            await sender.SendMessageAsync(queueName, message);
         }
 
-        private async Task<uint> getMessageCount()
+        private async Task<uint> getMessageCount(string queueName)
         {
-            return await receiver.GetMessageCountAsync(QueueName);
+            return await receiver.GetMessageCountAsync(queueName);
         }
 
         [Test]
         public async Task ReceiveMessageTest()
         {
             var message = Guid.NewGuid().ToString();
-            receiver.AddListener(QueueName);
-            await SendMessage(message);
+            receiver.AddListener(QueueName+"X");
+            await SendMessage(message,QueueName+"X");
             await Task.Delay(1000); // Уменьшить время ожидания
             var exists = receiver.Messages.Any(m => m.Message == message);
             Assert.That(exists, "Message was not received.");

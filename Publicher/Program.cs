@@ -3,15 +3,21 @@ namespace my
 {
     public class Programm {
 
-        static void Main(string[] args) {
-            var ms = new MessageSender("localhost");
-            var message = $"tiks:{DateTime.Now.Ticks} \n message send {DateTime.Now.Year} {DateTime.Now.Minute}  {DateTime.Now.Second}   !";
-            ms.SendMessage("my2", message);
+        static void Main(string[] args)
+        {
 
-            Thread.Sleep(1000);
-            message = $"tiks:{DateTime.Now.Ticks} \n message send {DateTime.Now.Year} {DateTime.Now.Minute}  {DateTime.Now.Second}   !";
-            ms.SendMessage("my2", message);
-          
+            for (int i = 0; i < 30; i++)
+            {
+                var ms = new MessageSender("localhost");
+                var message = $"{i}.1) tiks:{DateTime.Now.Ticks} \n message send  nobody {DateTime.Now.Year} {DateTime.Now.Minute}  {DateTime.Now.Second}   !";
+                ms.SendMessage("", message,"kk");
+
+                Thread.Sleep(500);
+                message = $"{i}.2) tiks:{DateTime.Now.Ticks} \n message Сергей Шестаков {DateTime.Now.Year} {DateTime.Now.Minute}  {DateTime.Now.Second}   !";
+                ms.SendMessage("", message, "Сергей Шестаков");
+
+            }
+            Console.ReadLine();
         }
     } 
 }

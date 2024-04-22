@@ -1,34 +1,57 @@
 ﻿using NLog;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
-using System.Text;
-
 namespace Rabbit
 {
     public abstract class RabbitBase : IDisposable
     {
-        protected readonly ConnectionFactory factory;
+        protected readonly IAsyncConnectionFactory factory;
         private IConnection _connection;
         private IModel _channel;
         private bool _disposed = false;
-        ILogger _logger;
-        protected ILogger Logger { get { if (_logger == null) { 
-                _logger = LogManager.GetCurrentClassLogger();
+        ILogger? _logger;
+        protected ILogger Logger
+        {
+            get
+            {
+                if (_logger == null)
+                {
+                    _logger = LogManager.GetCurrentClassLogger();
                 }
                 return _logger;
-            } }
+            }
+        }
 
         protected IConnection Connection => _connection ??= factory.CreateConnection();
 
-        protected IModel Channel => _channel ??= Connection.CreateModel();
-
-        public RabbitBase(ConnectionFactory factory,ILogger log = null)
+        protected IModel Channel
         {
+            get
+            {
+                if (_channel == null)
+                {
+                    _channel = Connection.CreateModel();
+                }
+                return _channel;
+            }
+            set
+            {
+                if (_channel != null)
+                {
+                    _channel.Dispose();
+                }
+                _channel = value;
+            }
+        }
+
+        public RabbitBase(IAsyncConnectionFactory factory, ILogger? log = null)
+        {
+            _logger = log;
             this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
         }
-        public RabbitBase(string host,ILogger log = null)
+        public RabbitBase(string host, ILogger? log = null)
         {
-            this.factory = new ConnectionFactory() { HostName = host }; 
+            _logger = log;
+            this.factory = new ConnectionFactory() { HostName = host };
         }
 
         protected virtual void Dispose(bool disposing)
@@ -50,6 +73,4 @@ namespace Rabbit
             GC.SuppressFinalize(this);
         }
     }
-
- 
 }
